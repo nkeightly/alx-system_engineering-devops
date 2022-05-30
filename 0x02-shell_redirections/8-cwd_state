@@ -1,0 +1,8 @@
+#!/bin/bash
+ls -la > ls_cwd_content
+
+© 2022 GitHub, Inc.
+
+Terms
+
+
