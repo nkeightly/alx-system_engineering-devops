@@ -1,54 +1,32 @@
-# Postmortem
+Outage Postmortem
+Issue Summary
+Duration of Outage: Feb. 3, 2023 from 10:00 AM to 11:00 AM (PST)
 
-Upon the release of ALX's System Engineering & DevOps project 0x19, approximately 06:00 West African Time (WAT) here in Nigeria, an outage occurred on an isolated Ubuntu 14.04 container running an Apache web server. GET requests on the server led to 500 Internal Server Error's, when the expected response was an HTML file defining a simple Holberton WordPress site.
+Impact: Website was down for 50% of users for an hour. Users experienced difficulty accessing the website and viewing its contents.
 
-## Debugging Process
+Root Cause: A misconfigured firewall caused the website to be inaccessible.
 
-Bug debugger Bamidele (Lexxyla... as in my actual initials... made that up on the spot, pretty
-good, huh?) encountered the issue upon opening the project and being, well, instructed to
-address it, roughly 19:20 PST. He promptly proceeded to undergo solving the problem.
+Timeline
+10:00 AM: Issue detected. Monitoring alerts indicated that the website was not responding.
 
-1. Checked running processes using `ps aux`. Two `apache2` processes - `root` and `www-data` -
-were properly running.
+10:10 AM: The incident was investigated. The team assumed that the issue was caused by a high traffic volume.
 
-2. Looked in the `sites-available` folder of the `/etc/apache2/` directory. Determined that
-the web server was serving content located in `/var/www/html/`.
+10:30 AM: The incident was escalated to a senior engineer. A customer complaint confirmed that the website was down.
 
-3. In one terminal, ran `strace` on the PID of the `root` Apache process. In another, curled
-the server. Expected great things... only to be disappointed. `strace` gave no useful
-information.
+10:45 AM: The root cause of the issue was discovered. The firewall was found to be misconfigured, causing the website to be inaccessible.
 
-4. Repeated step 3, except on the PID of the `www-data` process. Kept expectations lower this
-time... but was rewarded! `strace` revelead an `-1 ENOENT (No such file or directory)` error
-occurring upon an attempt to access the file `/var/www/html/wp-includes/class-wp-locale.phpp`.
+11:00 AM: The issue was resolved by reconfiguring the firewall to allow the website to be accessible.
 
-5. Looked through files in the `/var/www/html/` directory one-by-one, using Vim pattern
-matching to try and locate the erroneous `.phpp` file extension. Located it in the
-`wp-settings.php` file. (Line 137, `require_once( ABSPATH . WPINC . '/class-wp-locale.php' );`).
+Root Cause and Resolution
+The root cause of the issue was a misconfigured firewall. The firewall was blocking access to the website, causing it to be down for 50% of users for an hour. The issue was resolved by reconfiguring the firewall to allow the website to be accessible.
 
-6. Removed the trailing `p` from the line.
+Corrective and Preventative Measures
+The following measures have been taken to prevent similar incidents from happening in the future:
 
-7. Tested another `curl` on the server. 200 A-ok!
+Regular monitoring of the firewall to ensure that it is functioning properly.
 
-8. Wrote a Puppet manifest to automate fixing of the error.
+Automated alerts have been added to the monitoring system to notify the team of any issues with the firewall.
 
-## Summation
+Documentation has been updated to include information about the firewall and its proper configuration.
 
-In short, a typo. Gotta love'em. In full, the WordPress app was encountering a critical
-error in `wp-settings.php` when tyring to load the file `class-wp-locale.phpp`. The correct
-file name, located in the `wp-content` directory of the application folder, was
-`class-wp-locale.php`.
-
-Patch involved a simple fix on the typo, removing the trailing `p`.
-
-## Prevention
-
-This outage was not a web server error, but an application error. To prevent such outages
-moving forward, please keep the following in mind.
-
-* Test! Test test test. Test the application before deploying. This error would have arisen
-and could have been addressed earlier had the app been tested.
-
-* Status monitoring. Enable some uptime-monitoring service such as
-[UptimeRobot](./https://uptimerobot.com/) to alert instantly upon outage of the website.
-
+The team will receive additional training on firewall configurations and security measures.
