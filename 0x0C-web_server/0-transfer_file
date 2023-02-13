@@ -16,4 +16,3 @@ path_to_ssh_key=$4
 # Disable strict host key checking
 # Transfer file to the user home directory (~/)
 scp -o StrictHostKeyChecking=no -i $path_to_ssh_key $path_to_file $username@$server_ip:~/
-
