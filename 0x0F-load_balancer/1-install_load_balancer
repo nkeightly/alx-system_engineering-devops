@@ -6,8 +6,8 @@ apt-get update
 apt-get -y install haproxy
 
 #Set the hostnames of the web servers
-echo "127.0.0.1 53432-web-01" >> /etc/hosts
-echo "127.0.0.1 53432-web-02" >> /etc/hosts
+echo "127.0.0.1 web-01" >> /etc/hosts
+echo "127.0.0.1 web-02" >> /etc/hosts
 
 #Restart networking to apply hostname changes
 systemctl restart networking
@@ -25,8 +25,8 @@ mode http
 balance roundrobin
 option httpclose
 option forwardfor
-server 53432-web-01 53432-web-01:80 check
-server 53432-web-02 53432-web-02:80 check
+server web-01 web-01:80 check
+server web-02 web-02:80 check
 " >> /etc/haproxy/haproxy.cfg
 
 #Restart HAproxy
