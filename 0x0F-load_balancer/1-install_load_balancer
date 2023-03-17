@@ -1,36 +1,35 @@
 #!/usr/bin/env bash
 # This script installs and configures HAproxy on a new Ubuntu machine
 
-#Install and setup HAproxy
+# Get the STUDENT_ID from the user
+read -p "Enter your STUDENT_ID: " STUDENT_ID
+
+# Set the hostnames of the web servers
+echo "127.0.0.1 53432-web-01" >> /etc/hosts
+echo "127.0.0.1 53432-web-02" >> /etc/hosts
+
+# Install HAproxy
 apt-get update
 apt-get -y install haproxy
 
-#Set the hostnames of the web servers
-echo "127.0.0.1 web-01" >> /etc/hosts
-echo "127.0.0.1 web-02" >> /etc/hosts
-
-#Restart networking to apply hostname changes
-systemctl restart networking
-
-#Configure HAproxy
-sed -i 's/ENABLED=.*/ENABLED=1/' /etc/default/haproxy
-
-echo "
+# Configure HAproxy
+cat > /etc/haproxy/haproxy.cfg <<EOF
 frontend web
-bind *:80
-mode http
-default_backend webservers
+    bind *:80
+    mode http
+    default_backend webservers
+
 backend webservers
-mode http
-balance roundrobin
-option httpclose
-option forwardfor
-server web-01 web-01:80 check
-server web-02 web-02:80 check
-" >> /etc/haproxy/haproxy.cfg
+    mode http
+    balance roundrobin
+    option httpclose
+    option forwardfor
+    server web-01 53432-web-01:80 check
+    server web-02 53432-web-02:80 check
+EOF
 
-#Restart HAproxy
-systemctl restart haproxy
-
-#Enable HAproxy init script
+# Enable HAproxy init script
 systemctl enable haproxy
+
+# Restart HAproxy
+systemctl restart haproxy
